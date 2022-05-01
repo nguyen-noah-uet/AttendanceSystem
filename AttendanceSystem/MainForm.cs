@@ -90,7 +90,7 @@ namespace AttendanceSystem
             dataGridView2.ReadOnly = true;
             dataGridView2.Columns[0].HeaderText = "Mã sinh viên";
             dataGridView2.Columns[1].HeaderText = "Họ tên";
-            dataGridView2.Columns[2].HeaderText = "Tổng sô buổi";
+            dataGridView2.Columns[2].HeaderText = "Số buổi hiện tại";
             dataGridView2.Columns[3].HeaderText = "Đúng giờ";
             dataGridView2.Columns[4].HeaderText = "Muộn";
             dataGridView2.Columns[5].HeaderText = "Nghỉ có phép";
@@ -153,7 +153,9 @@ namespace AttendanceSystem
 
         private void AddClassButton_Click(object sender, EventArgs e)
         {
-
+            var addClassForm = new AddClassForm(_user, _classRepository);
+            addClassForm.ShowDialog();
+            LoadClasses();
         }
 
         private void AttendanceButton_Click(object sender, EventArgs e)

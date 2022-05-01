@@ -4,6 +4,7 @@ using AttendanceSystem.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AttendanceSystem.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20220501072751_AddNoOfSessionsAttributeToClassTable")]
+    partial class AddNoOfSessionsAttributeToClassTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,7 +69,7 @@ namespace AttendanceSystem.Migrations
                     b.Property<int?>("NoOfSessions")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -166,13 +168,9 @@ namespace AttendanceSystem.Migrations
 
             modelBuilder.Entity("AttendanceSystem.Models.Class", b =>
                 {
-                    b.HasOne("AttendanceSystem.Models.User", "User")
+                    b.HasOne("AttendanceSystem.Models.User", null)
                         .WithMany("Classes")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("AttendanceSystem.Models.ClassStudent", b =>
