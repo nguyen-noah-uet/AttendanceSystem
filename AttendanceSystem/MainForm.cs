@@ -10,8 +10,8 @@ namespace AttendanceSystem
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IClass_StudentRepository _classStudentRepository;
-        private User _user = new User();
-        private Class _currentClass;
+        private User? _user = new User();
+        private Class? _currentClass;
         public MainForm(Context context)
         {
             _context = context;
@@ -38,7 +38,7 @@ namespace AttendanceSystem
             {
                 _user = loginForm.User;
                 // Show username
-                ShowUsername(loginForm);
+                ShowUsername();
                 // Load classes
                 LoadClasses();
                 // Load Attendances
@@ -72,38 +72,48 @@ namespace AttendanceSystem
                from Students s;
              */
             _currentClass = comboBox2.SelectedItem as Class;
-            dataGridView2.DataSource = (from s in _context.Students
-                                        join cs in _context.ClassStudent on s.Id equals cs.StudentId
-                                        where cs.ClassId == _currentClass.Id
-                                        select new
-                                        {
-                                            s.Id,
-                                            s.StudentName,
-                                            T = _context.Attendances.Count(a => a.ClassId == _currentClass.Id && a.StudentId == s.Id),
-                                            D = _context.Attendances.Count(a => a.ClassId == _currentClass.Id && a.StudentId == s.Id && a.Status.Contains("ng gi")),
-                                            M = _context.Attendances.Count(a => a.ClassId == _currentClass.Id && a.StudentId == s.Id && a.Status.Contains("mu")),
-                                            CP = _context.Attendances.Count(a => a.ClassId == _currentClass.Id && a.StudentId == s.Id && a.Status.Contains("có")),
-                                            KP = _context.Attendances.Count(a => a.ClassId == _currentClass.Id && a.StudentId == s.Id && a.Status.Contains("kh")),
-                                        })
+            if (_currentClass != null)
+            {
+                int noOfSessions = _context.Classes.Single(c => c.Id == _currentClass.Id).NoOfSessions;
+
+                dataGridView2.DataSource = (from s in _context.Students
+                                            join cs in _context.ClassStudent on s.Id equals cs.StudentId
+                                            where cs.ClassId == _currentClass.Id
+                                            select new
+                                            {
+                                                s.Id,
+                                                s.StudentName,
+                                                T = _context.Attendances.Count(a => a.ClassId == _currentClass.Id && a.StudentId == s.Id),
+                                                D = _context.Attendances.Count(a => a.ClassId == _currentClass.Id && a.StudentId == s.Id && a.Status.Contains("ng gi")),
+                                                M = _context.Attendances.Count(a => a.ClassId == _currentClass.Id && a.StudentId == s.Id && a.Status.Contains("mu")),
+                                                CP = _context.Attendances.Count(a => a.ClassId == _currentClass.Id && a.StudentId == s.Id && a.Status.Contains("có")),
+                                                KP = _context.Attendances.Count(a => a.ClassId == _currentClass.Id && a.StudentId == s.Id && a.Status.Contains("kh")),
+                                                Accept = (
+                                                    _context.Attendances.Count(a => a.ClassId == _currentClass.Id && a.StudentId == s.Id && a.Status.Contains("kh")) >= 0.2 * noOfSessions ? "Không" : "Có"
+                                                    )
+                                            })
                                         .OrderBy(s => s.Id)
                                         .ToList();
-            dataGridView2.ReadOnly = true;
-            dataGridView2.Columns[0].HeaderText = "Mã sinh viên";
-            dataGridView2.Columns[1].HeaderText = "Họ tên";
-            dataGridView2.Columns[2].HeaderText = "Số buổi hiện tại";
-            dataGridView2.Columns[3].HeaderText = "Đúng giờ";
-            dataGridView2.Columns[4].HeaderText = "Muộn";
-            dataGridView2.Columns[5].HeaderText = "Nghỉ có phép";
-            dataGridView2.Columns[6].HeaderText = "Nghỉ không phép";
-            foreach (DataGridViewColumn column in dataGridView2.Columns)
-            {
-                column.Width = 100;
+                dataGridView2.ReadOnly = true;
+                dataGridView2.Columns[0].HeaderText = "Mã sinh viên";
+                dataGridView2.Columns[1].HeaderText = "Họ tên";
+                dataGridView2.Columns[2].HeaderText = "Số buổi hiện tại";
+                dataGridView2.Columns[3].HeaderText = "Đúng giờ";
+                dataGridView2.Columns[4].HeaderText = "Muộn";
+                dataGridView2.Columns[5].HeaderText = "Nghỉ có phép";
+                dataGridView2.Columns[6].HeaderText = "Nghỉ không phép";
+                dataGridView2.Columns[7].HeaderText = "Được dự thi";
+                foreach (DataGridViewColumn column in dataGridView2.Columns)
+                {
+                    column.Width = 84;
+                }
+
+                dataGridView2.Columns[1].Width = 150;
             }
 
-            dataGridView2.Columns[1].Width = 150;
         }
 
-        private void ShowUsername(LoginForm loginForm)
+        private void ShowUsername()
         {
             label3.Text = $"Tài khoản: {_user.Username}";
         }
@@ -119,23 +129,27 @@ namespace AttendanceSystem
         private void LoadAttendances()
         {
             _currentClass = comboBox1.SelectedItem as Class;
-            dataGridView1.DataSource = _attendanceRepository.GetAttendancesByClassIdAndDate(_currentClass.Id, dateTimePicker1.Value.Date).OrderBy(a => a.StudentId).ToList();
-            //dataGridView1.DataSource = _attendanceRepository.GetAttendancesByClassId(_currentClass.Id).OrderBy(a => a.Date).ThenBy(a => a.StudentId).ToList();
-            dataGridView1.Columns[0].HeaderText = "Mã điểm danh";
-            dataGridView1.Columns[0].Visible = false;
-            dataGridView1.Columns[1].HeaderText = "Mã lớp";
-            dataGridView1.Columns[1].ReadOnly = true;
-            dataGridView1.Columns[2].HeaderText = "Lớp";
-            dataGridView1.Columns[2].ReadOnly = true;
-            dataGridView1.Columns[3].HeaderText = "Mã sinh viên";
-            dataGridView1.Columns[3].ReadOnly = true;
-            dataGridView1.Columns[4].HeaderText = "Sinh viên";
-            dataGridView1.Columns[4].Width = 150;
-            dataGridView1.Columns[4].ReadOnly = true;
-            dataGridView1.Columns[5].HeaderText = "Ngày";
-            dataGridView1.Columns[5].ReadOnly = true;
-            dataGridView1.Columns[6].HeaderText = "Trạng thái";
-            dataGridView1.Columns[6].ReadOnly = false;
+            if (_currentClass != null)
+            {
+                dataGridView1.DataSource = _attendanceRepository.GetAttendancesByClassIdAndDate(_currentClass.Id, dateTimePicker1.Value.Date).OrderBy(a => a.StudentId).ToList();
+                //dataGridView1.DataSource = _attendanceRepository.GetAttendancesByClassId(_currentClass.Id).OrderBy(a => a.Date).ThenBy(a => a.StudentId).ToList();
+                dataGridView1.Columns[0].HeaderText = "Mã điểm danh";
+                dataGridView1.Columns[0].Visible = false;
+                dataGridView1.Columns[1].HeaderText = "Mã lớp";
+                dataGridView1.Columns[1].ReadOnly = true;
+                dataGridView1.Columns[2].HeaderText = "Lớp";
+                dataGridView1.Columns[2].ReadOnly = true;
+                dataGridView1.Columns[3].HeaderText = "Mã sinh viên";
+                dataGridView1.Columns[3].ReadOnly = true;
+                dataGridView1.Columns[4].HeaderText = "Sinh viên";
+                dataGridView1.Columns[4].Width = 150;
+                dataGridView1.Columns[4].ReadOnly = true;
+                dataGridView1.Columns[5].HeaderText = "Ngày";
+                dataGridView1.Columns[5].ReadOnly = true;
+                dataGridView1.Columns[6].HeaderText = "Trạng thái";
+                dataGridView1.Columns[6].ReadOnly = false;
+            }
+
         }
 
         private void ClassDetailButton_Click(object sender, EventArgs e)
@@ -160,17 +174,25 @@ namespace AttendanceSystem
 
         private void AttendanceButton_Click(object sender, EventArgs e)
         {
-            var students = _studentRepository.GetStudentsByClassId(_currentClass.Id).ToList();
-            foreach (var student in students)
+            if (_currentClass == null)
             {
-                _attendanceRepository.AddAttendance(new Attendance() { ClassId = _currentClass.Id, StudentId = student.Id, Status = "", Date = dateTimePicker1.Value.Date });
+                MessageBox.Show("Chưa có lớp học nào", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                var students = _studentRepository.GetStudentsByClassId(_currentClass.Id).ToList();
+                foreach (var student in students)
+                {
+                    _attendanceRepository.AddAttendance(new Attendance() { ClassId = _currentClass.Id, StudentId = student.Id, Status = "", Date = dateTimePicker1.Value.Date });
+                }
+
+                _context.SaveChanges();
+                dataGridView1.DataSource = _attendanceRepository.GetAttendancesByClassIdAndDate(_currentClass.Id, dateTimePicker1.Value.Date).OrderBy(a => a.StudentId).ToList();
+                dataGridView1.Update();
+                dataGridView1.Refresh();
+                SaveButton.Enabled = true;
             }
 
-            _context.SaveChanges();
-            dataGridView1.DataSource = _attendanceRepository.GetAttendancesByClassIdAndDate(_currentClass.Id, dateTimePicker1.Value.Date).OrderBy(a => a.StudentId).ToList();
-            dataGridView1.Update();
-            dataGridView1.Refresh();
-            SaveButton.Enabled = true;
         }
 
         private void SaveButton_Click(object sender, EventArgs e)
@@ -182,6 +204,11 @@ namespace AttendanceSystem
 
         private void DateTimePicker_OnDateChanged(object? sender, EventArgs e)
         {
+            if (_currentClass == null)
+            {
+                MessageBox.Show("Chưa có lớp học nào", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             dataGridView1.DataSource = _attendanceRepository.GetAttendancesByClassIdAndDate(_currentClass.Id, dateTimePicker1.Value.Date).ToList();
             // if grid already has data
             if (dataGridView1.RowCount > 0)
@@ -197,6 +224,11 @@ namespace AttendanceSystem
 
         private void SelectDayCheckBox_CheckedChanged(object sender, EventArgs e)
         {
+            if (_currentClass == null)
+            {
+                MessageBox.Show("Chưa có lớp học nào", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             bool currentState = SelectDayCheckBox.Checked;
             if (currentState == false)
             {

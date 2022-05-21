@@ -11,7 +11,15 @@ public class UserRepository : IUserRepository
         _context = context;
     }
 
-    public bool CheckUsernamePassword(string username, string password)
+    public bool IsUsernameExisted(string username)
+    {
+        var x = _context.Users.FirstOrDefault(x => x.Username == username);
+        if (x != null)
+            return true;
+        return false;
+    }
+
+    public bool ValidateLogin(string username, string password)
     {
         var user = _context.Users.SingleOrDefault(u => u.Username == username);
         if (user != null)
@@ -25,5 +33,15 @@ public class UserRepository : IUserRepository
     public User? GetUserByUsername(string username)
     {
         return _context.Users.SingleOrDefault(u => u.Username == username);
+    }
+
+    public void AddUser(User user)
+    {
+        _context.Users.Add(user);
+    }
+
+    public void SaveChanges()
+    {
+        _context.SaveChanges();
     }
 }

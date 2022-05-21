@@ -5,34 +5,47 @@ namespace AttendanceSystem
 {
     public partial class SubjectClassDetail : Form
     {
-        private readonly Class _currentClass;
+        private readonly Class? _currentClass;
         private readonly IStudentRepository _studentRepository;
         private readonly IClass_StudentRepository _classStudentRepository;
 
-        public SubjectClassDetail(Class currentClass, IStudentRepository studentRepository, IClass_StudentRepository classStudentRepository)
+        public SubjectClassDetail(Class? currentClass, IStudentRepository studentRepository, IClass_StudentRepository classStudentRepository)
         {
             _currentClass = currentClass;
             _studentRepository = studentRepository;
             _classStudentRepository = classStudentRepository;
-            _studentRepository.GetStudentsByClassId(_currentClass.Id).ToList();
+            //_studentRepository.GetStudentsByClassId(_currentClass.Id).ToList();
             InitializeComponent();
         }
 
         private void StudentForm_Load(object sender, EventArgs e)
         {
-            ClassNameLabel.Text = _currentClass.ClassName;
-            ClassIdLabel.Text = _currentClass.Id.ToString();
-            LoadStudents();
+            if (_currentClass == null)
+            {
+                MessageBox.Show("Chưa có lớp học nào", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+            }
+            else
+            {
+                ClassNameLabel.Text = _currentClass.ClassName;
+                ClassIdLabel.Text = _currentClass.Id.ToString();
+                LoadStudents();
+            }
+
         }
 
         private void LoadStudents()
         {
-            dataGridView1.DataSource = _studentRepository.GetStudentsByClassId(_currentClass.Id).ToList();
-            dataGridView1.ReadOnly = true;
-            dataGridView1.Columns[0].HeaderText = "Mã sinh viên";
-            dataGridView1.Columns[1].HeaderText = "Họ và tên";
-            dataGridView1.Columns[1].Width = 200;
-            dataGridView1.Columns[2].Visible = false;
+            if (_currentClass != null)
+            {
+                dataGridView1.DataSource = _studentRepository.GetStudentsByClassId(_currentClass.Id).ToList();
+                dataGridView1.ReadOnly = true;
+                dataGridView1.Columns[0].HeaderText = "Mã sinh viên";
+                dataGridView1.Columns[1].HeaderText = "Họ và tên";
+                dataGridView1.Columns[1].Width = 200;
+                dataGridView1.Columns[2].Visible = false;
+            }
+
         }
 
         private void CancelButton_Click(object sender, EventArgs e)

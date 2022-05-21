@@ -9,8 +9,8 @@ public class Class
     [Required]
     public string ClassName { get; set; }
 
-    public int? NoOfSessions { get; set; }
-    public User User { get; set; }
+    public int NoOfSessions { get; set; }
+    public User? User { get; set; }
 
     public IEnumerable<Attendance> Attendances { get; set; }
     //public IEnumerable<Student> Students { get; set; }

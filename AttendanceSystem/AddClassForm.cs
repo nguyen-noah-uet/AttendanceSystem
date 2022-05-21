@@ -5,9 +5,9 @@ namespace AttendanceSystem
 {
     public partial class AddClassForm : Form
     {
-        private readonly User _user;
+        private readonly User? _user;
         private readonly IClassRepository _classRepository;
-        public AddClassForm(User user, IClassRepository classRepository)
+        public AddClassForm(User? user, IClassRepository classRepository)
         {
             _user = user;
             _classRepository = classRepository;

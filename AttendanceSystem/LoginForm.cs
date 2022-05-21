@@ -7,7 +7,7 @@ namespace AttendanceSystem
     {
         private readonly IUserRepository _userRepository;
         public bool Success { get; private set; } = false;
-        public User User { get; private set; }
+        public User? User { get; private set; }
         public LoginForm(IUserRepository userRepository)
         {
             _userRepository = userRepository;
@@ -16,7 +16,7 @@ namespace AttendanceSystem
 
         private void LoginButton_Click(object sender, EventArgs e)
         {
-            Success = _userRepository.CheckUsernamePassword(UsernameTextBox.Text, PasswordTextBox.Text);
+            Success = _userRepository.ValidateLogin(UsernameTextBox.Text, PasswordTextBox.Text);
             if (!Success)
             {
                 MessageBox.Show("Sai tên đăng nhập hoặc mật khẩu", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -25,6 +25,13 @@ namespace AttendanceSystem
 
             User = _userRepository.GetUserByUsername(UsernameTextBox.Text);
             Close();
+
+        }
+
+        private void SignUpButton_Click(object sender, EventArgs e)
+        {
+            var signUpForm = new SignUpForm(_userRepository);
+            signUpForm.ShowDialog();
 
         }
     }
