@@ -50,6 +50,10 @@ namespace AttendanceSystem
                 {
                     AttendanceButton.Enabled = false;
                 }
+                else
+                {
+                    AttendanceButton.Enabled = true;
+                }
                 SaveButton.Enabled = false;
             }
             else
@@ -191,6 +195,7 @@ namespace AttendanceSystem
                 dataGridView1.Update();
                 dataGridView1.Refresh();
                 SaveButton.Enabled = true;
+                AttendanceButton.Enabled = false;
             }
 
         }
